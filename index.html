@@ -47,7 +47,8 @@
   <div id="error" class="error" style="display:none;"></div>
 
   <div class="viewer-container">
-    <model-viewer src=""
+    <model-viewer id="viewer"
+      src=""
       alt="3D-malli"
       camera-controls
       auto-rotate
@@ -59,7 +60,7 @@
     </model-viewer>
   </div>
 
-  <p class="note">3D-mallit copyright Maiseri</p>
+  <p class="note">Varmista, että kaikki viitatut *.glb*-tiedostot ovat samassa GitHub Pages -repossa ja julkisina.</p>
 
   <script>
     /**
@@ -68,17 +69,16 @@
      * HUOM: Älä käytä Google Drivea (CORS). Hostaa GLB:t GitHub Pagesissa.
      */
     const catalog = {
-      "Talot": [
+      "Alihankinta 2025": [
         { name: "Talo A", path: "models/talo_a.glb" },
         { name: "Talo B", path: "models/talo_b.glb" }
       ],
-      "Kalusteet": [
+      "Teknologia 2025": [
         { name: "Tuoli", path: "models/tuoli.glb" },
         { name: "Pöytä", path: "models/poyta.glb" }
       ],
       "Muut": [
         { name: "Viscom-kärry", path: "models/viskokarry.glb" },
-        { name: "Elementit", path: "models/elementit.glb" }
       ]
     };
 
