@@ -2,38 +2,136 @@
 <html lang="fi">
 <head>
   <meta charset="UTF-8" />
-  <title>3D-malli</title>
+  <title>3D-mallit – Kategoria & malli</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- model-viewer kirjaston lataus jsDelivristä -->
   <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
+    :root { color-scheme: light dark; }
+    html, body { margin: 0; padding: 0; height: 100%; }
     body {
-      margin: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background: #f4f4f4;
+      display: grid; grid-template-rows: auto 1fr; gap: 16px; padding: 16px;
+      background: #f4f4f4; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
     }
-    model-viewer {
-      width: 800px;
-      height: 600px;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    header {
+      display: grid; gap: 12px; grid-template-columns: 1fr 1fr; align-items: center;
+      background: #fff; border-radius: 12px; padding: 12px 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);
     }
+    header .field { display: flex; gap: 8px; align-items: center; }
+    label { font-weight: 600; white-space: nowrap; }
+    select {
+      width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #ccc;
+      background: #fff; font-size: 14px;
+    }
+    .viewer-container {
+      width: 100%; max-width: 1200px; margin: 0 auto; aspect-ratio: 16 / 9;
+      background: #fff; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); overflow: hidden;
+    }
+    model-viewer { width: 100%; height: 100%; --poster-color: #fafafa; }
+    .note { text-align: center; color: #666; font-size: 12px; }
+    .error { margin: 8px auto; max-width: 1200px; padding: 10px 12px; border-radius: 10px; background: #ffe7e7; color: #900; border: 1px solid #f5b9b9; }
   </style>
 </head>
 <body>
-  <model-viewer src="vantaa_educa.glb"
-                alt="SketchUp 3D-malli"
-                camera-controls
-                auto-rotate
-                shadow-intensity="1"
-                exposure="1"
-                tone-mapping="aces"
-                ar
-                ar-modes="webxr scene-viewer quick-look">
-  </model-viewer>
+  <header>
+    <div class="field">
+      <label for="category">Kategoria</label>
+      <select id="category"></select>
+    </div>
+    <div class="field">
+      <label for="model">Malli</label>
+      <select id="model"></select>
+    </div>
+  </header>
+
+  <div id="error" class="error" style="display:none;"></div>
+
+  <div class="viewer-container">
+    <model-viewer id="viewer"
+      src=""  <!-- asetetaan JS:llä -->
+      alt="3D-malli"
+      camera-controls
+      auto-rotate
+      shadow-intensity="1"
+      exposure="1"
+      tone-mapping="aces"
+      ar
+      ar-modes="webxr scene-viewer quick-look">
+    </model-viewer>
+  </div>
+
+  <p class="note">Varmista, että kaikki viitatut *.glb*-tiedostot ovat samassa GitHub Pages -repossa ja julkisina.</p>
+
+  <script>
+    /**
+     * Määrittele Kategoriat -> Mallit (nimi + polku GLB-tiedostoon).
+     * Polku voi olla suhteellinen (sama repo), esim. "models/talo.glb".
+     * HUOM: Älä käytä Google Drivea (CORS). Hostaa GLB:t GitHub Pagesissa.
+     */
+    const catalog = {
+      "Talot": [
+        { name: "Talo A", path: "models/talo_a.glb" },
+        { name: "Talo B", path: "models/talo_b.glb" }
+      ],
+      "Kalusteet": [
+        { name: "Tuoli", path: "models/tuoli.glb" },
+        { name: "Pöytä", path: "models/poyta.glb" }
+      ],
+      "Koneet": [
+        { name: "Robottilava", path: "models/robottilava.glb" },
+        { name: "Moottori", path: "models/moottori.glb" }
+      ]
+    };
+
+    const categoryEl = document.getElementById('category');
+    const modelEl = document.getElementById('model');
+    const viewerEl = document.getElementById('viewer');
+    const errorEl = document.getElementById('error');
+
+    function setError(msg) { errorEl.textContent = msg; errorEl.style.display = 'block'; }
+    function clearError() { errorEl.style.display = 'none'; errorEl.textContent = ''; }
+
+    function populateCategories() {
+      categoryEl.innerHTML = '';
+      const cats = Object.keys(catalog);
+      if (cats.length === 0) { setError('Yhtään kategoriaa ei ole määritelty. Lisää `catalog`-objektiin sisältöä.'); return; }
+      cats.forEach(cat => {
+        const opt = document.createElement('option');
+        opt.value = cat; opt.textContent = cat; categoryEl.appendChild(opt);
+      });
+    }
+
+    function populateModelsForCategory(category) {
+      modelEl.innerHTML = '';
+      const models = catalog[category] || [];
+      if (models.length === 0) { setError(`Kategoriassa "${category}" ei ole malleja.`); viewerEl.removeAttribute('src'); return; }
+      clearError();
+      models.forEach((m, i) => {
+        const opt = document.createElement('option');
+        opt.value = m.path; opt.textContent = m.name; if (i === 0) opt.selected = true; modelEl.appendChild(opt);
+      });
+      viewerEl.setAttribute('src', models[0].path);
+    }
+
+    function init() {
+      populateCategories();
+      const firstCategory = categoryEl.options[0]?.value;
+      if (firstCategory) { populateModelsForCategory(firstCategory); }
+
+      categoryEl.addEventListener('change', () => {
+        const cat = categoryEl.value; populateModelsForCategory(cat);
+      });
+
+      modelEl.addEventListener('change', () => {
+        clearError(); const path = modelEl.value; viewerEl.setAttribute('src', path);
+      });
+
+      viewerEl.addEventListener('error', () => {
+        setError('Mallin lataus epäonnistui. Tarkista, että GLB-polku on oikein ja tiedosto on saatavilla (GitHub Pages).');
+      });
+    }
+
+    init();
+  </script>
 </body>
 </html>
-
