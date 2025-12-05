@@ -35,11 +35,11 @@
 <body>
   <header>
     <div class="field">
-      <label for="category">Messut</label>
+      <label for="category">Kategoria</label>
       <select id="category"></select>
     </div>
     <div class="field">
-      <label for="model">Osasto</label>
+      <label for="model">Malli</label>
       <select id="model"></select>
     </div>
   </header>
@@ -69,10 +69,17 @@
      * HUOM: Älä käytä Google Drivea (CORS). Hostaa GLB:t GitHub Pagesissa.
      */
     const catalog = {
-      "Messut": [
-        { name: "Alihankinta 2025", path: "models/talo_a.glb" },
-        { name: "Teknologia 2025", path: "models/talo_b.glb" }
+      "Alihankinta 2025": [
+        { name: "Talo A", path: "models/talo_a.glb" },
+        { name: "Talo B", path: "models/talo_b.glb" }
       ],
+      "Teknologia 2025": [
+        { name: "Tuoli", path: "models/tuoli.glb" },
+        { name: "Pöytä", path: "models/poyta.glb" }
+      ],
+      "Muut": [
+        { name: "Viscom-kärry", path: "models/viskokarry.glb" },
+      ]
     };
 
     const categoryEl = document.getElementById('category');
